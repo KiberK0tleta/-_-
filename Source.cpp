@@ -1,125 +1,357 @@
-//Домашка ООП 7
-#define _CRT_SECURE_NO_WARNINGS
+//Домашка_ООП_2
 #include<iostream>
 using namespace std;
+
 using std::cin;
 using std::cout;
 using std::endl;
-#define delimiter "\n----------------------------------------------------\n"
-class String;
-String operator+(const String& left, const String& right);
-class String
+
+
+class Fraction;	//Дробь      	//Class declaration - Объявление класса
+Fraction operator+(Fraction left, Fraction right);	//Прототип оператора +
+Fraction operator-(Fraction left, Fraction right);
+Fraction operator*(Fraction left, Fraction right);
+Fraction operator/(Fraction left, Fraction right);
+class Fraction
 {
-	char* str;	//Указатель на строку в динамической памяти
-	int size;	//Размер строки
+	int integer;	//Целая часть
+	int numerator;	//Числитель
+	int denominator;//Знаменатель
+	bool minus;
+	bool plus;
 public:
-	const char* get_str()const
+	bool get_minus()const
 	{
-		return str;
+		return minus;
 	}
-	char* get_str()
+	int get_integer()const
 	{
-		return str;
+		return integer;
 	}
-	int get_size()const
+	int get_numerator()const
 	{
-		return size;
+		return numerator;
 	}
-	//				Constructors:
-	explicit String(int size = 80)
+	int get_denominator()const
 	{
-		this->size = size;
-		this->str = new char[size] {};
-		cout << (size == 80 ? "Default" : "Size") << "Constructor:\t" << this << endl;
+		return denominator;
 	}
-	String(const char* str)
+	void set_minus(bool minus)
 	{
-		this->size = strlen(str) + 1;
-		this->str = new char[size] {};
-		strcpy(this->str, str);	
-		cout << "Constructor:\t\t" << this << endl;
+		this->minus = minus;
 	}
-	String(const String& other)
+	void set_integer(int integer)
 	{
-		this->size = other.size;
-		this->str = new char[size] {};
-		for (int i = 0; i < size; i++)
-			this->str[i] = other.str[i];
-		//strcpy(this->str, other.str);
-		cout << "CopyConstructor:\t" << this << endl;
+		this->integer = integer;
 	}
-	String(String&& other)
+	void set_numerator(int numerator)
 	{
-		this->size = other.size;
-		this->str = other.str;
-		other.str = nullptr;
-		cout << "MoveConstructor:\t" << this << endl;
+		this->numerator = numerator;
 	}
-	~String()
+	void set_denominator(int denominator)
 	{
-		delete[] this->str;
-		cout << "Destructor:\t\t" << this << endl;
+		if (denominator == 0)denominator = 1;
+		this->denominator = denominator;
 	}
-	//			Operators:
-	String& operator=(const String& other)
+	//////////////////////////////////////////////////////////
+	Fraction& set_minus_to_number()
 	{
-		if (this == &other)return *this;
-		delete[] this->str;
-		this->size = other.size;
-		this->str = new char[size] {};
-		strcpy(this->str, other.str);
-		cout << "CopyAssignment:\t\t" << this << endl;
+		if (minus)
+		{
+			integer = -integer;
+			numerator = -numerator;
+			minus = false;
+		}
 		return *this;
 	}
-	String& operator=(String&& other)
+	Fraction& get_minus_from_number()
 	{
-		delete[] this->str;
-		this->size = other.size;
-		this->str = other.str;
-		other.str = nullptr;
-		cout << "MoveAssignment:\t\t" << this << endl;
+		if (integer < 0)
+		{
+			integer = -integer;
+			minus = true;
+		}
+		if (numerator < 0)
+		{
+			numerator = -numerator;
+			minus = true;
+		}
 		return *this;
 	}
-	String& operator+=(const String& other)
+	////////////////////////////////////////////////////////////
+
+	//			Constructors:
+	Fraction()
+	{
+		this->minus = false;
+		this->integer = 0;
+		this->numerator = 0;
+		this->denominator = 1;
+		cout << "Constructor0:\t" << this << endl;
+	}
+	explicit Fraction(int integer)	//explicit - явный
+	{
+		this->minus = false;
+		this->plus = false;
+		this->integer = integer;
+		this->numerator = 0;
+		this->denominator = 1;
+		if (integer < 0)
+		{
+			minus = true;
+			this->integer = -integer;
+		}
+
+	}
+	Fraction(double decimal)
+	{
+		decimal += 1e-10;
+		minus = false;
+		if (decimal < 0)
+		{
+			minus = true;
+			decimal = -decimal;
+		}
+		integer = decimal;
+		decimal -= integer;
+		denominator = 1e+9;
+		numerator = decimal * denominator;
+		reduce();
+
+
+	}
+	Fraction(int numerator, int denominator)
+	{
+		this->minus = false;
+		this->integer = 0;
+		this->numerator = numerator;
+		this->set_denominator(denominator);
+		if (numerator < 0)
+		{
+			minus = true;
+			this->numerator = -numerator;
+		}
+
+
+	}
+	Fraction(int integer, int numerator, int denominator)
+	{
+		this->minus = false;
+		this->integer = integer;
+		this->numerator = numerator;
+		this->set_denominator(denominator);
+		if (integer < 0)
+		{
+			minus = true;
+			this->integer = -integer;
+		}
+		if (numerator < 0)
+		{
+			minus = true;
+			this->numerator = -numerator;
+		}
+
+	}
+	~Fraction(){}
+
+	Fraction& operator=(const Fraction& other)
+	{
+		this->minus = other.minus;
+		this->integer = other.integer;
+		this->numerator = other.numerator;
+		this->denominator = other.denominator;
+		return *this;
+	}
+
+	Fraction& operator+=(const Fraction& other)
 	{
 		return *this = *this + other;
 	}
-
-	const char& operator[](int i)const
+	Fraction& operator-=(const Fraction& other)
 	{
-		return this->str[i];
+		return *this = *this - other;
 	}
-	char& operator[](int i)
+	Fraction& operator*=(const Fraction& other)
 	{
-		return this->str[i];
+		return *this = *this * other;
+	}
+	Fraction& operator/=(const Fraction& other)
+	{
+		return *this = *this / other;
 	}
 
-	//			Methods:
-	void print()const
+	//				Increment/Decrement
+	Fraction& operator++()
 	{
-		cout << "str:\t" << str << endl;
-		cout << "size:\t" << size << endl;
+		this->integer++;
+		return *this;
+	}
+	Fraction operator++(int)
+	{
+		Fraction old = *this;
+		this->integer++;
+		return old;
+	}
+
+	//				Type cast operators:
+	explicit operator int()const
+	{
+		return minus ? -integer : integer;
+	}
+	operator double()const
+	{
+		double number = integer + (double)numerator / denominator;
+		if (minus)number = -number;
+		return number;
+	}
+
+	//				Methods:
+	Fraction& to_proper() //Переводит неправильную дробь в правильную 
+	{
+		get_minus_from_number();
+		integer += numerator / denominator;
+		numerator %= denominator;
+		return *this;
+	}
+	Fraction& to_improper()  //Переводит дробь в неправильную
+	{
+		get_minus_from_number();
+		numerator += integer * denominator;
+		integer = 0;
+		return *this;
+	}
+	Fraction& reduce()   //Сокращает дробь
+	{
+		if (numerator == 0)return *this;
+		int more, less, rest;
+		if (numerator > denominator)more = numerator, less = denominator;
+		else less = numerator, more = denominator;
+		do
+		{
+			rest = more % less;
+			more = less;
+			less = rest;
+		} while (rest);
+		int GCD = more;	
+		numerator /= GCD;
+		denominator /= GCD;
+		return *this;
 	}
 };
-String operator+(const String& left, const String& right)
+Fraction operator+(Fraction left, Fraction right)
 {
-	String result(left.get_size() + right.get_size() - 1);
-	strcpy(result.get_str(), left.get_str());//выполняет копирование строки left в строку result
-	strcat(result.get_str(), right.get_str());//выполняет конкатенацию строки right в строку result
-	return result;
+	left.to_proper();
+	right.to_proper();
+	left.set_minus_to_number();
+	right.set_minus_to_number();
+
+	Fraction result;
+	result.set_integer(left.get_integer() + right.get_integer());
+	result.set_numerator(left.get_numerator() * right.get_denominator() + right.get_numerator() * left.get_denominator());
+	result.set_denominator(left.get_denominator() * right.get_denominator());
+	result.to_proper().get_minus_from_number();
+	return result.reduce();
 }
-ostream& operator<<(ostream& os, const String& obj)
+Fraction operator-(Fraction left, Fraction right)
 {
-	return os << obj.get_str();
+	/*left.to_proper().set_minus_to_number();
+	right.to_proper().set_minus_to_number();
+	Fraction result
+	(
+		left.get_integer() - right.get_integer(),
+		left.get_numerator()*right.get_denominator() - right.get_numerator()*left.get_denominator(),
+		left.get_denominator()*right.get_denominator()
+	);
+	return result.to_proper().get_minus_from_number().reduce();*/
+	left.to_improper().set_minus_to_number();
+	right.to_improper().set_minus_to_number();
+	return Fraction
+	(
+		left.get_numerator() * right.get_denominator() - right.get_numerator() * left.get_denominator(),
+		left.get_denominator() * right.get_denominator()
+	).to_proper().reduce();
 }
+Fraction operator*(Fraction left, Fraction right)
+{
+	left.to_improper().set_minus_to_number();
+	right.to_improper().set_minus_to_number();
+	return Fraction
+	(
+		left.get_numerator() * right.get_numerator(),
+		left.get_denominator() * right.get_denominator()
+	).to_proper().get_minus_from_number().reduce();
+}
+Fraction operator/(Fraction left, Fraction right)
+{
+	left.to_improper();
+	right.to_improper();
+	Fraction result
+	(
+		left.get_numerator() * right.get_denominator(),
+		right.get_numerator() * left.get_denominator()
+	);
+	result.to_proper();
+	if (left.get_minus() || right.get_minus())result.set_minus(true);
+	if (left.get_minus() && right.get_minus())result.set_minus(false);
+	return result.reduce();
+}
+
+bool operator==(Fraction left, Fraction right)
+{
+	left.to_improper().reduce();
+	right.to_improper().reduce();
+	return left.get_numerator() == right.get_numerator() && left.get_denominator() == right.get_denominator();
+}
+bool operator!=(const Fraction& left, const Fraction& right)
+{
+	return !(left == right);
+}
+bool operator<(const Fraction& left, const Fraction& right)
+{
+	return (double)left < (double)right;
+}
+bool operator>(const Fraction& left, const Fraction& right)
+{
+	return (double)left > (double)right;
+}
+bool operator>=(const Fraction& left, const Fraction& right)
+{
+	return left > right || left == right;
+}
+bool operator<=(const Fraction& left, const Fraction& right)
+{
+	return !(left > right);
+}
+
+ostream& operator<<(ostream& os, const Fraction& obj)
+{
+	if (obj.get_minus())os << "(-";
+	if (obj.get_integer())os << obj.get_integer();
+	if (obj.get_integer() && obj.get_numerator())os << "(";
+	if (obj.get_numerator())os << obj.get_numerator() << "/" << obj.get_denominator();
+	if (obj.get_integer() && obj.get_numerator())os << ")";
+	if (obj.get_integer() == 0 && obj.get_numerator() == 0)os << 0;
+	if (obj.get_minus())os << ")";
+	return os;
+}
+
+
+#define COMPARISON_OPERATORS
+
 void main()
 {
 	setlocale(LC_ALL, "");
-	String str1 = "Hello";
-	String str2 = "World";
-	cout << delimiter << endl;
-	String str3;
-	str3 = str1 + str2;//Оператор + будет выполнять конкатенацию (слияние) строк
-	cout << delimiter << endl;
-	cout << str3 << endl;
+
+#ifdef COMPARISON_OPERATORS
+	Fraction A(1, 2);
+	Fraction B(5, 10);
+
+	cout << "Strict:\t";
+	cout << (A == B) << endl;
+	cout << (A != B) << endl;
+	cout << "Not strict:\n";
+	cout << (A <= B) << endl;
+	cout << (A >= B) << endl;
+#endif // COMPARISON_OPERAOTRS
+
 }
